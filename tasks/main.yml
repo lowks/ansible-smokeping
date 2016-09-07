@@ -1,0 +1,23 @@
+---
+- hosts: all
+  tasks:
+    - name: Install extra repo
+      yum: name=http://mirror.ghettoforge.org/distributions/gf/el/6/gf/x86_64/gf-release-6-10.gf.el6.noarch.rpm
+
+    - name: Install smokeping
+      yum: name={{ item }} update_cache=yes
+      with_items:
+          - sendmail
+          - smokeping
+
+    - name: Enable services
+      service: name={{ item }} state=started enabled=yes
+      with_items:
+          - smokeping
+          - httpd
+
+    - name: Overwrite smokeping.conf
+      template: src=files/smokeping.conf dest=/etc/httpd/conf.d/smokeping.conf
+
+    - name: Restart Apache
+      service: name=httpd state=restarted
